@@ -1,0 +1,27 @@
+// services/DatabaseContext.js
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import * as SQLite from 'expo-sqlite';
+
+const DatabaseContext = createContext();
+
+export const DatabaseProvider = ({ children }) => {
+  const [db, setDb] = useState(null);
+
+  useEffect(() => {
+    const database = SQLite.openDatabase('vendas.db');
+    database.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS vendas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, valor REAL, data TEXT);'
+      );
+    });
+    setDb(database);
+  }, []);
+
+  return (
+    <DatabaseContext.Provider value={{ db }}>
+      {children}
+    </DatabaseContext.Provider>
+  );
+};
+
+export const useDatabase = () => useContext(DatabaseContext);
