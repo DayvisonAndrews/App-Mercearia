@@ -1,0 +1,69 @@
+// screens/AddVendaScreen.js
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { useDatabase } from '../services/DatabaseContext';
+
+export default function AddVendaScreen({ navigation }) {
+  const { db } = useDatabase();
+  const [nome, setNome] = useState('');
+  const [valor, setValor] = useState('');
+
+  const salvarVenda = () => {
+    if (!nome || !valor) {
+      Alert.alert('Erro', 'Preencha todos os campos.');
+      return;
+    }
+
+    const dataAtual = new Date().toLocaleDateString();
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT INTO vendas (nome, valor, data) VALUES (?, ?, ?);',
+        [nome, parseFloat(valor), dataAtual],
+        () => {
+          Alert.alert('Sucesso', 'Venda registrada com sucesso.');
+          navigation.goBack();
+        },
+        (_, error) => {
+          Alert.alert('Erro', 'Não foi possível salvar a venda.');
+          console.log(error);
+        }
+      );
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.label}>Nome do Produto:</Text>
+      <TextInput
+        style={styles.input}
+        value={nome}
+        onChangeText={setNome}
+        placeholder="Ex: Arroz"
+      />
+
+      <Text style={styles.label}>Valor (R$):</Text>
+      <TextInput
+        style={styles.input}
+        value={valor}
+        onChangeText={setValor}
+        placeholder="Ex: 25.00"
+        keyboardType="decimal-pad"
+      />
+
+      <Button title="Salvar Venda" onPress={salvarVenda} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  label: { fontWeight: 'bold', marginTop: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+});
