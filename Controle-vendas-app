@@ -1,0 +1,24 @@
+// App principal do projeto
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './screens/HomeScreen';
+import AddVendaScreen from './screens/AddVendaScreen';
+import EstoqueScreen from './screens/EstoqueScreen';
+import { DatabaseProvider } from './services/DatabaseContext';
+
+const Stack = createNativeStackNavigator();
+
+export default function App() {
+  return (
+    <DatabaseProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Início" component={HomeScreen} />
+          <Stack.Screen name="Nova Venda" component={AddVendaScreen} />
+          <Stack.Screen name="Estoque" component={EstoqueScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </DatabaseProvider>
+  );
+}
