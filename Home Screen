@@ -1,0 +1,50 @@
+// screens/HomeScreen.js
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { useDatabase } from '../services/DatabaseContext';
+
+export default function HomeScreen({ navigation }) {
+  const { db } = useDatabase();
+  const [vendas, setVendas] = useState([]);
+
+  const carregarVendas = () => {
+    if (db) {
+      db.transaction(tx => {
+        tx.executeSql('SELECT * FROM vendas ORDER BY id DESC;', [], (_, { rows }) => {
+          setVendas(rows._array);
+        });
+      });
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', carregarVendas);
+    return unsubscribe;
+  }, [navigation, db]);
+
+  return (
+    <View style={styles.container}>
+      <Button title="Nova Venda" onPress={() => navigation.navigate('Nova Venda')} />
+      <Button title="Estoque" onPress={() => navigation.navigate('Estoque')} />
+
+      <Text style={styles.titulo}>Últimas Vendas</Text>
+      <FlatList
+        data={vendas}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text>{item.nome} - R$ {item.valor.toFixed(2)}</Text>
+            <Text style={styles.data}>{item.data}</Text>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  titulo: { fontSize: 18, marginVertical: 10 },
+  item: { padding: 10, borderBottomWidth: 1, borderColor: '#ccc' },
+  data: { color: '#666', fontSize: 12 },
+});
